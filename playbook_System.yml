@@ -6,14 +6,13 @@
       user:
         name: esieeadmin       # Nom de l'utilisateur à créer
         comment: esieeadmin    # Commentaire associé à l'utilisateur (visible dans /etc/passwd)
-        password: "$6$CfVITtKt8Yg8n4wS$nD3t3hAvG6ksNHDkM9QdMT9szPIjsQeTTxQJ1MjXWq9ug.Kp270iCZWn7nCDRGlheVRpSjGsmGJde.HHHstnc1" # Mot de passe hashé au format SHA-512, généré via mkpasswd (commande : mkpasswd --method=SHA-512)
     - name: Set authorized key taken from file
       ansible.posix.authorized_key:
         user: esieeadmin       # Spécifie l'utilisateur cible pour la clé SSH
         state: present         # S'assure que la clé est présente (ajoutée si absente)
         key: '{{ item }}'      # Clé publique à ajouter, lue depuis un fichier
       with_file:
-        - public_keys/antony.txt     # lé publique de Antony
+        - public_keys/antony.txt     # Clé publique de Antony
         - public_keys/clement.txt    # Clé publique de Clément
         - public_keys/josselin.txt   # Clé publique de Josselin
         - public_keys/samy.txt       # Clé publique de Samy
