@@ -1,0 +1,20 @@
+---
+- name: Installation propre d'Apache2
+  hosts: webserver
+  become: yes
+  tasks:
+    - name: Mise à jour du cache apt
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Installation du paquet apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Activation et démarrage du service apache2
+      service:
+        name: apache2
+        enabled: yes
+        state: started
