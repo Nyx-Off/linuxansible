@@ -4,8 +4,10 @@ all:
       hosts:
         webserver1:
           ansible_host: 172.20.10.11
+          ansible_user: esiee
         webserver2:
           ansible_host: 172.20.10.9
+          ansible_user: esiee
     dbservers:
       hosts:
         mysqlserver1:
