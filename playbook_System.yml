@@ -1,0 +1,25 @@
+- hosts: all
+  become: true
+  tasks :
+    - name : Création de l'utilisateur esieeadmin
+      user:
+        name: esieeadmin
+        comment: esieeadmin
+    - name: Set authorized key taken from file
+      ansible.posix.authorized_key:
+        user: esieeadmin
+        state: present
+        key: '{{ item }}'
+      with_file:
+        - public_keys/antony
+        - public_keys/clement
+        - public_keys/josselin
+        - public_keys/samy
+        - public_keys/thommy
+    - name: Ensure SELinux is set to enforcing mode
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/esiee
+        regexp: "^esieeadmin"
+        line: ALL=(ALL) NOPASSWD :ALL
+        
+# ansible-playbook -i inventory.yml playbook_User.yml -K
