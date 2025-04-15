@@ -1,0 +1,47 @@
+- name: Préparer l'environnement Apache pour héberger des clients
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Créer les répertoires clients
+      file:
+        path: "/var/www/client{{ item }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+      loop: "{{ range(1, client_count + 1) | list }}"
+
+    - name: Construire la liste des virtual hosts pour les clients
+      set_fact:
+        client_vhosts: "{{ client_vhosts | default([]) + [ {
+                              'servername': ansible_default_ipv4.address,
+                              'document_root': '/var/www/client' ~ item,
+                              'access_log': '/var/log/apache2/client' ~ item ~ '_access.log',
+                              'error_log': '/var/log/apache2/client' ~ item ~ '_error.log',
+                              'extra_parameters': '<Directory \"/var/www/client' ~ item ~ '\">\n    Options Indexes FollowSymLinks\n    AllowOverride All\n    Require all granted\n</Directory>'
+                            } ] }}"
+      loop: "{{ range(1, client_count + 1) | list }}"
+
+    - name: Définir la variable apache_vhosts pour le rôle Apache
+      set_fact:
+        apache_vhosts: "{{ client_vhosts }}"
+
+  vars:
+    # Nombre de répertoires (et vhosts) à créer
+    client_count: 3
+
+    # Port principal d'Apache
+    apache_listen_port: 80
+
+    # Adresse email de l'administrateur
+    apache_server_admin: webmaster@example.com
+
+    # Modules additionnels pour Apache (ici, utiles pour WordPress ou autres applications)
+    apache_additional_modules:
+      - rewrite
+      - headers
+
+  roles:
+    - geerlingguy.apache
