@@ -3,3 +3,13 @@
     url: https://wordpress.org/latest.zip
     dest: /tmp/wordpress.zip
     mode: '0644'
+
+- name: Extract wordpress.zip into /var/www/client1/
+  ansible.builtin.unarchive:
+    src: /tmp/wordpress.zip
+    dest: /var/www/client1/
+
+- name: Extract wordpress.zip into /var/www/client2/
+  ansible.builtin.unarchive:
+    src: /tmp/wordpress.zip
+    dest: /var/www/client2/
