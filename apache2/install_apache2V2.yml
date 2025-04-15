@@ -28,14 +28,7 @@
     apache_vhosts:
       - servername: "{{ ansible_default_ipv4.address }}" # Recup ip auto
         document_root: "/var/www/wordpress"              # Doit correspondre au pre_task
-        access_log: "/var/log/apache2/wordpress_access.log"
-        error_log: "/var/log/apache2/wordpress_error.log"
-        extra_parameters: |
-          <Directory "/var/www/wordpress">
-              Options Indexes FollowSymLinks
-              AllowOverride All
-              Require all granted
-          </Directory>
+
     #variables pour customiser le rôle
 
   roles:
