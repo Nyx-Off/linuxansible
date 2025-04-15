@@ -1,25 +1,34 @@
-- hosts: all
-  become: true
+- hosts: all                    # Appliquer ce playbook sur tous les hôtes définis dans l'inventaire
+  become: true                 # Exécuter les tâches avec les privilèges root (sudo)
   tasks :
-    - name : Création de l'utilisateur esieeadmin
+
+    - name: Création de l'utilisateur esieeadmin
       user:
-        name: esieeadmin
-        comment: esieeadmin
+        name: esieeadmin       # Nom de l'utilisateur à créer
+        comment: esieeadmin    # Commentaire associé à l'utilisateur (visible dans /etc/passwd)
+        password: "$6$CfVITtKt8Yg8n4wS$nD3t3hAvG6ksNHDkM9QdMT9szPIjsQeTTxQJ1MjXWq9ug.Kp270iCZWn7nCDRGlheVRpSjGsmGJde.HHHstnc1" # Mot de passe hashé au format SHA-512, généré via mkpasswd (commande : mkpasswd --method=SHA-512)
     - name: Set authorized key taken from file
       ansible.posix.authorized_key:
-        user: esieeadmin
-        state: present
-        key: '{{ item }}'
+        user: esieeadmin       # Spécifie l'utilisateur cible pour la clé SSH
+        state: present         # S'assure que la clé est présente (ajoutée si absente)
+        key: '{{ item }}'      # Clé publique à ajouter, lue depuis un fichier
       with_file:
-        - public_keys/antony
-        - public_keys/clement
-        - public_keys/josselin
-        - public_keys/samy
-        - public_keys/thommy
-    - name: Ensure SELinux is set to enforcing mode
-      ansible.builtin.lineinfile:
-        path: /etc/sudoers.d/esiee
-        regexp: "^esieeadmin"
-        line: ALL=(ALL) NOPASSWD :ALL
+        - public_keys/antony.txt     # lé publique de Antony
+        - public_keys/clement.txt    # Clé publique de Clément
+        - public_keys/josselin.txt   # Clé publique de Josselin
+        - public_keys/samy.txt       # Clé publique de Samy
+        - public_keys/thommy.txt     # Clé publique de Thommy
         
-# ansible-playbook -i inventory.yml playbook_User.yml -K
+
+    - name: Add esieeadmin to sudoers with no password (module sudoers)
+      community.general.sudoers:
+        name: esieeadmin     # Nom du fichier sudoers généré (/etc/sudoers.d/esieeadmin)
+        user: esieeadmin     # Utilisateur à qui on accorde les droits sudo
+        runas: ALL           # L'utilisateur peut exécuter des commandes en tant que n'importe quel utilisateur
+        commands: ALL        # L'utilisateur peut exécuter toutes les commandes via sudo
+        nopassword: true     # Ne demande pas de mot de passe pour utiliser sudo
+        state: present       # Assure que cette règle est bien présente
+
+
+        
+# Commande d'execution du playbook : ansible-playbook -i inventory.yml playbook_User.yml -K
