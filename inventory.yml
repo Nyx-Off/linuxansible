@@ -1,0 +1,9 @@
+all:
+  hosts:
+    webserver:
+      ansible_host: 172.20.10.
+    database_server:
+      ansible_host: 172.20.10.
+      msqlserver-id: 1
+    database_replicat:
+      mysqlserver-id: 2
