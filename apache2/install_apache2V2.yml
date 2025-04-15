@@ -1,5 +1,5 @@
 - name: Préparer l'environnement Apache pour héberger WordPress
-  hosts: webserver
+  hosts: webservers
   become: yes
 
   # Préparations de l'environnement
