@@ -26,19 +26,16 @@
 
     # Configuration VirtualHosts Apache
     apache_vhosts:
-      - servername: 'wordpress.example.com'
-        server_aliases:
-          - www.wordpress.example.com
-        document_root: '/var/www/wordpress'
-        access_log: '/var/log/apache2/wordpress_access.log'
-        error_log: '/var/log/apache2/wordpress_error.log'
+      - servername: "172.20.10.11"           # Remplacez par l'adresse IP de votre serveur si différente
+        document_root: "/var/www/wordpress"   # Doit correspondre au pre_task
+        access_log: "/var/log/apache2/wordpress_access.log"
+        error_log: "/var/log/apache2/wordpress_error.log"
         extra_parameters: |
           <Directory "/var/www/wordpress">
               Options Indexes FollowSymLinks
               AllowOverride All
               Require all granted
           </Directory>
-
     #variables pour customiser le rôle
 
   roles:
