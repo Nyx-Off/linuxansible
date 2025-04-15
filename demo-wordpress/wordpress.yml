@@ -1,0 +1,5 @@
+- name: Download WordPress archive
+  ansible.builtin.get_url:
+    url: https://wordpress.org/latest.zip
+    dest: /tmp/wordpress.zip
+    mode: '0644'
