@@ -1,0 +1,92 @@
+- name: Préparer l'environnement Apache pour héberger des clients
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Créer les répertoires clients
+      file:
+        path: "/var/www/client{{ item }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+      loop: "{{ range(1, client_count + 1) | list }}"
+
+    - name: Construire la liste des virtual hosts pour les clients
+      set_fact:
+        client_vhosts: "{{ client_vhosts | default([]) + [ {
+                              'servername': ansible_default_ipv4.address,
+                              'document_root': '/var/www/client' ~ item,
+                              'access_log': '/var/log/apache2/client' ~ item ~ '_access.log',
+                              'error_log': '/var/log/apache2/client' ~ item ~ '_error.log',
+                              'extra_parameters': '<Directory \"/var/www/client' ~ item ~ '\">\n    Options Indexes FollowSymLinks\n    AllowOverride All\n    Require all granted\n</Directory>'
+                            } ] }}"
+      loop: "{{ range(1, client_count + 1) | list }}"
+
+    - name: Définir la variable apache_vhosts pour le rôle Apache
+      set_fact:
+        apache_vhosts: "{{ client_vhosts }}"
+
+  vars:
+    # Nombre de répertoires (et vhosts) à créer (modifiez selon vos besoins)
+    client_count: 3
+
+    # Port principal d'Apache
+    apache_listen_port: 80
+
+    # Adresse email de l'administrateur
+    apache_server_admin: webmaster@example.com
+
+    # Modules additionnels pour Apache
+    apache_additional_modules:
+      - rewrite
+      - headers
+
+    # Option pour supprimer le vhost par défaut (désactive / supprime le site /var/www/html)
+    apache_remove_default_vhost: true
+
+  roles:
+    - geerlingguy.apache
+
+  post_tasks:
+    - name: Supprimer le répertoire /var/www/html par défaut s'il existe
+      file:
+        path: "/var/www/html"
+        state: absent
+
+    - name: Créer un index.html dans /var/www listant les répertoires clients
+      copy:
+        dest: "/var/www/index.html"
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Index des Clients</title>
+          </head>
+          <body>
+            <h1>Liste des Clients</h1>
+            {% for i in range(1, client_count + 1) %}
+              <p><a href="/client{{ i }}/index.html">Client {{ i }}</a></p>
+            {% endfor %}
+          </body>
+          </html>
+
+    - name: Créer un fichier index.html personnalisé dans chaque répertoire client
+      copy:
+        dest: "/var/www/client{{ item }}/index.html"
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+             <meta charset="utf-8">
+             <title>Bienvenue sur Client {{ item }}</title>
+          </head>
+          <body>
+            <h1>Page personnalisée pour Client {{ item }}</h1>
+            <p>Contenu personnalisé pour Client {{ item }}.</p>
+            <a href="/index.html">Retour à l'index</a>
+          </body>
+          </html>
+      loop: "{{ range(1, client_count + 1) | list }}"
