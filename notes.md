@@ -1,6 +1,8 @@
 git fetch
 mettre a jour le repo local.
 
+git pull
+
 git remote -v
 
 git clone
