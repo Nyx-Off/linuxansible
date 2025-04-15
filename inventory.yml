@@ -6,4 +6,5 @@ all:
       ansible_host: 172.20.10.
       msqlserver-id: 1
     database_replicat:
+      ansible_host: 172.20.10.
       mysqlserver-id: 2
