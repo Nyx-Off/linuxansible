@@ -1,0 +1,36 @@
+# Partie 1 : Génération de la paire de clés SSH sur le serveur de sauvegarde (backupserver)
+- name: Générer la paire de clés SSH sur le serveur de sauvegarde
+  hosts: backupserver        # Ce bloc ne s'exécute que sur le groupe d'hôtes "backupserver"
+  become: true               # Exécution des tâches avec privilèges root (sudo)
+
+  tasks:
+    # Crée une paire de clés RSA pour l'utilisateur "esieeadmin" si elle n'existe pas
+    - name: Générer une paire de clés SSH si elle n'existe pas
+      ansible.builtin.openssh_keypair:
+        path: /home/esieeadmin/.ssh/id_rsa   # Chemin de la clé privée (la clé publique sera .pub)
+        type: rsa                            # Type de clé (RSA ici)
+        size: 2048                           # Taille de la clé en bits
+        owner: esieeadmin                    # Propriétaire du fichier
+        group: esieeadmin                    # Groupe du fichier
+        mode: '0600'                         # Permissions sécurisées (lecture/écriture pour le propriétaire)
+      become_user: esieeadmin                # Exécute la commande en tant qu'esieeadmin (non root)
+
+    # Transfère la clé publique générée sur le serveur de backup vers la machine d’orchestration Ansible
+    - name: Récupérer la clé publique du serveur de sauvegarde
+      ansible.builtin.fetch:
+        src: /home/esieeadmin/.ssh/id_rsa.pub         # Chemin de la clé publique sur le serveur
+        dest: fetched_keys/backup_id_rsa.pub          # Chemin local sur la machine de contrôle
+        flat: yes                                     # Évite de créer une arborescence par hôte
+
+# Partie 2 : Déploiement de la clé publique du serveur backup sur le serveur mysqlreplicat
+- name: Déployer la clé publique sur le serveur de réplication MySQL
+  hosts: mysqlreplicat       # Ce bloc s'exécute uniquement sur l'hôte mysqlreplicat
+  become: true               # Utilisation de sudo pour les tâches
+
+  tasks:
+    # Ajoute la clé publique du serveur de sauvegarde dans le fichier authorized_keys de esieeadmin
+    - name: Ajouter la clé publique du serveur de sauvegarde à authorized_keys
+      ansible.posix.authorized_key:
+        user: esieeadmin                            # Utilisateur cible sur mysqlreplicat
+        state: present                              # S’assure que la clé est présente
+        key: "{{ lookup('file', 'fetched_keys/backup_id_rsa.pub') }}"  # Charge la clé publique récupérée précédemment
