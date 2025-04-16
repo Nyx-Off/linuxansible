@@ -71,6 +71,11 @@
       - php-curl
       - php-gd
       - php-xml
+      - php-bcmath
+      - php-imagick 
+      - php-zip
+      - php-json
+      - php-intl
 
     # Chaîne de configuration pour le vhost global
     default_extra_parameters: |
@@ -111,4 +116,3 @@
               {% endfor %}
           </body>
           </html>
-          
