@@ -3,7 +3,7 @@ all:
     webservers:
       hosts:
         webserver1:
-          ansible_host: 192.168.2.200
+          ansible_host: 172.16.202.23
           ansible_user: esiee
         webserver2:
           ansible_host: 172.20.10.9
