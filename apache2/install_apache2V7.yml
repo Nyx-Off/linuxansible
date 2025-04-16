@@ -1,0 +1,105 @@
+- name: Préparer l'environnement Apache et PHP pour héberger des clients
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Créer le répertoire racine /var/www s'il n'existe pas
+      file:
+        path: "/var/www"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+
+    - name: Créer les répertoires clients dynamiquement à partir de l'inventaire
+      file:
+        path: "/var/www/{{ item }}"
+        state: directory
+        owner: "{{ item }}"
+        group: www-data   # Vous pouvez modifier le groupe si besoin
+        mode: "0755"
+      loop: "{{ client_users }}"
+
+  vars:
+    # Port principal d'Apache
+    apache_listen_port: 80
+
+    # Adresse email de l'administrateur
+    apache_server_admin: webmaster@example.com
+
+    # Modules additionnels pour Apache
+    apache_additional_modules:
+      - rewrite
+      - headers
+
+    # VirtualHost unique pour servir le contenu de /var/www (page d'index)
+    apache_vhosts:
+      - servername: "{{ ansible_default_ipv4.address }}"
+        document_root: "/var/www"
+        access_log: "/var/log/apache2/access.log"
+        error_log: "/var/log/apache2/error.log"
+        extra_parameters: |
+          DocumentRoot /var/www
+          <Directory "/var/www">
+              Options Indexes FollowSymLinks
+              AllowOverride All
+              Require all granted
+          </Directory>
+
+    # Désactiver le VirtualHost par défaut (s'il est créé par la distribution)
+    apache_remove_default_vhost: true
+
+    # Variables pour le rôle PHP (optionnel et selon vos besoins)
+    php_package: "php"  # Vous pouvez préciser la version si besoin, par exemple "php7.4"
+    php_modules:
+      - php-mysql
+      - php-curl
+      - php-gd
+      - php-xml
+
+  roles:
+    - geerlingguy.apache
+    - geerlingguy.php  # Installation et configuration de PHP
+
+  post_tasks:
+    - name: Supprimer le répertoire /var/www/html par défaut s'il existe
+      file:
+        path: "/var/www/html"
+        state: absent
+
+    - name: Créer l'index principal dans /var/www pour accéder aux clients
+      copy:
+        dest: "/var/www/index.html"
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="utf-8">
+              <title>Index des Clients</title>
+          </head>
+          <body>
+              <h1>Liste des Clients</h1>
+              {% for client in client_users %}
+                <p><a href="/{{ client }}/index.html">{{ client }}</a></p>
+              {% endfor %}
+          </body>
+          </html>
+
+    - name: Créer un index.html personnalisé dans chaque répertoire client
+      copy:
+        dest: "/var/www/{{ item }}/index.html"
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="utf-8">
+              <title>Bienvenue sur {{ item }}</title>
+          </head>
+          <body>
+              <h1>Page personnalisée pour {{ item }}</h1>
+              <p>Contenu personnalisé pour {{ item }}.</p>
+              <a href="/index.html">Retour à l'index</a>
+          </body>
+          </html>
+      loop: "{{ client_users }}"
