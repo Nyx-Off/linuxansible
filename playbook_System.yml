@@ -3,15 +3,15 @@
   
   tasks :
 
-    - name: Création de l'utilisateur esieeadmin
+    - name: Création de l'utilisateur testadmin
       user:
-        name: esieeadmin       # Nom de l'utilisateur à créer
+        name: testadmin       # Nom de l'utilisateur à créer
         shell: /bin/bash       # Définit /bin/bash comme shell par défaut (accès au terminal)
-        comment: esieeadmin    # Commentaire associé à l'utilisateur (visible dans /etc/passwd)
+        comment: testadmin    # Commentaire associé à l'utilisateur (visible dans /etc/passwd)
       
     - name: Set authorized key taken from file
       ansible.posix.authorized_key:
-        user: esieeadmin       # Spécifie l'utilisateur cible pour la clé SSH
+        user: testadmin       # Spécifie l'utilisateur cible pour la clé SSH
         state: present         # S'assure que la clé est présente (ajoutée si absente)
         key: '{{ item }}'      # Clé publique à ajouter, lue depuis un fichier
       with_file:
@@ -24,8 +24,8 @@
 
     - name: Add esieeadmin to sudoers with no password (module sudoers)
       community.general.sudoers:
-        name: esieeadmin     # Nom du fichier sudoers généré (/etc/sudoers.d/esieeadmin)
-        user: esieeadmin     # Utilisateur à qui on accorde les droits sudo
+        name: testadmin     # Nom du fichier sudoers généré (/etc/sudoers.d/esieeadmin)
+        user: testeadmin     # Utilisateur à qui on accorde les droits sudo
         runas: ALL           # L'utilisateur peut exécuter des commandes en tant que n'importe quel utilisateur
         commands: ALL        # L'utilisateur peut exécuter toutes les commandes via sudo
         nopassword: true     # Ne demande pas de mot de passe pour utiliser sudo
