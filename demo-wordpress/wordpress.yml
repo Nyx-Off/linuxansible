@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 - name: Download WordPress archive
   ansible.builtin.get_url:
     url: https://wordpress.org/latest.zip
@@ -13,3 +14,13 @@
   ansible.builtin.unarchive:
     src: /tmp/wordpress.zip
     dest: /var/www/client2/
+=======
+- hosts: webserver
+  become: true
+  tasks:
+    - name: Download WordPress archive
+      ansible.builtin.get_url:
+        url: https://wordpress.org/latest.zip
+        dest: /tmp/wordpress.zip
+        mode: '0644'
+>>>>>>> 708f491 (modif wordpress.yml)
