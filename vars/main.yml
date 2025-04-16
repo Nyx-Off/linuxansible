@@ -32,9 +32,8 @@ mysql_users:
     password: similarly-secure-password
     priv: "client4_db.*:ALL"
 
-mysql_replication_role: "master"
+
 mysql_enable_binlog: true
 mysql_log_bin: "/var/log/mysql/mysql-bin.log"
 mysql_binlog_format: "mixed"
-mysql_server_id: 1
 mysql_replication_ignore_db: []
