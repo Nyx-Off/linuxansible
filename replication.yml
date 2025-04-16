@@ -1,0 +1,13 @@
+- hosts: mysqlserver1
+  become: true
+  vars_files:
+    - vars/master.yml
+  roles:
+    - geerlingguy.mysql
+
+- hosts: mysqlreplicat
+  become: true
+  vars_files:
+    - vars/slave.yml
+  roles:
+    - geerlingguy.mysql
