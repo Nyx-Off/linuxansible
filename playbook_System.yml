@@ -33,11 +33,12 @@
 
     - name: Créer les utilisateurs clients sans sudo
       user:
-        name: "{{ item }}"                     # Nom de l'utilisateur (ex. : client1, client2, etc.)
-        comment: "Utilisateur {{ item }}"      # Description du compte, visible dans /etc/passwd
+        name: "{{ item.name }}"                     # Nom de l'utilisateur (ex. : client1, client2, etc.)
+        password: "{{ item.password | password_hash('sha512') }}"
+        comment: "Utilisateur {{ item.name }}"      # Description du compte, visible dans /etc/passwd
         shell: /bin/bash                       # Définit /bin/bash comme shell par défaut (accès au terminal)
       loop: "{{ client_users }}"               # Boucle sur chaque nom d'utilisateur défini dans la variable client_users
-
+      when: client_users is defined
 
 
 
