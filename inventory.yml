@@ -5,27 +5,24 @@ all:
         webserver1:
           ansible_host: 172.16.202.23
           ansible_user: esiee
-          vars:
-            client_users:
-              - name: client1
-                password: toto
-              - name: client3
-                password: titi
+          client_users:
+            - name: client1
+              password: toto
+            - name: client3
+              password: titi
         webserver2:
           ansible_host: 172.16.202.29
           ansible_user: esiee
-          vars:
-            client_users:
-              - name: client2
-                password: tata
-              - name: client4
-                password: tete
+           client_users:
+             - name: client2
+               password: tata
+             - name: client4
+               password: tete
     dbservers:
       hosts:
         mysqlserver1:
           ansible_host: 172.16.202.27
           ansible_user: esiee
-          vars:
             client_users:
               - name: client1
                 password: toto
@@ -37,7 +34,7 @@ all:
                 password: tete
         mysqlreplicat:
           ansible_host: 172.16.202.24
-          aisible_user: esiee
+          ansible_user: esiee
     backupservers:
       hosts:
         backupserver:
