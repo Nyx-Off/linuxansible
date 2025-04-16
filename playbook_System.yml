@@ -1,11 +1,14 @@
 - hosts: all                    # Appliquer ce playbook sur tous les hôtes définis dans l'inventaire
   become: true                 # Exécuter les tâches avec les privilèges root (sudo)
+  
   tasks :
 
     - name: Création de l'utilisateur esieeadmin
       user:
         name: esieeadmin       # Nom de l'utilisateur à créer
+        shell: /bin/bash       # Définit /bin/bash comme shell par défaut (accès au terminal)
         comment: esieeadmin    # Commentaire associé à l'utilisateur (visible dans /etc/passwd)
+      
     - name: Set authorized key taken from file
       ansible.posix.authorized_key:
         user: esieeadmin       # Spécifie l'utilisateur cible pour la clé SSH
@@ -27,6 +30,16 @@
         commands: ALL        # L'utilisateur peut exécuter toutes les commandes via sudo
         nopassword: true     # Ne demande pas de mot de passe pour utiliser sudo
         state: present       # Assure que cette règle est bien présente
+
+    - name: Créer les utilisateurs clients sans sudo
+      user:
+        name: "{{ item }}"                     # Nom de l'utilisateur (ex. : client1, client2, etc.)
+        comment: "Utilisateur {{ item }}"      # Description du compte, visible dans /etc/passwd
+        shell: /bin/bash                       # Définit /bin/bash comme shell par défaut (accès au terminal)
+      loop: "{{ client_users }}"               # Boucle sur chaque nom d'utilisateur défini dans la variable client_users
+
+
+
 
 
         
