@@ -6,12 +6,14 @@ all:
           ansible_host: 172.16.202.23
           ansible_user: esiee
         webserver2:
-          ansible_host: 172.20.10.9
+          ansible_host: 172.16.202.28
           ansible_user: esiee
     dbservers:
       hosts:
         mysqlserver1:
-          ansible_host: 172.20.10.6
+          ansible_host: 172.16.202.27
+          ansible_user: esiee
         mysqlreplicat:
-          ansible_host: 172.20.10.10
+          ansible_host: 172.16.202.24
+          aisible_user: esiee
 
