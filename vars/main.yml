@@ -1,0 +1,10 @@
+mysql_root_password: super-secure-password
+mysql_databases:
+  - name: database1_db
+    encoding: latin1
+    collation: latin1_general_ci
+mysql_users:
+  - name: josselin
+    host: mysqlserver1
+    password: similarly-secure-password
+    priv: "database1_db.*:ALL"
