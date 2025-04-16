@@ -1,42 +1,48 @@
-# Début du playbook pour effectuer une sauvegarde MySQL depuis mysqlreplicat
-- name: Sauvegarder la base de données et la transférer au serveur de backup
-  hosts: mysqlreplicat              # La tâche s'exécute uniquement sur l'hôte "mysqlreplicat"
-  become: true                      # Les tâches sont exécutées avec les droits root (sudo)
+# Début du playbook pour effectuer une sauvegarde de plusieurs bases MySQL depuis mysqlreplicat
+- name: Sauvegarder les bases des clients et les transférer au serveur de backup
+  hosts: mysqlreplicat        # S'exécute uniquement sur le serveur mysqlreplicat
+  become: true                # Utilisation de sudo pour les commandes système
 
-  vars:                             # Variables utilisées dans ce playbook
-    mysql_user: root               # Nom de l'utilisateur MySQL ayant les droits de dump
-    mysql_password: motdepasse     # Mot de passe MySQL (doit être sécurisé avec Ansible Vault)
-    db_name: nom_de_la_base        # Nom de la base de données à sauvegarder
-    dump_file: "/tmp/{{ db_name }}_backup.sql"    # Chemin du fichier temporaire de sauvegarde
-    remote_backup_dir: "/home/esieeadmin/backups" # Répertoire cible sur le serveur de sauvegarde
+  vars:                       # Variables utilisées dans le playbook
+    mysql_user: esieeadmin    # Utilisateur MySQL ayant les droits nécessaires pour faire des dumps
+    mysql_password: esiee     # Mot de passe MySQL (à sécuriser avec Ansible Vault plus tard)
+    db_list:                  # Liste des bases de données à sauvegarder (celles des clients)
+      - client1_db
+      - client2_db
+      - client3_db
+      - client4_db
+    remote_backup_dir: "/home/esieeadmin/backups"  # Dossier cible pour stocker les dumps sur le serveur backup
 
   tasks:
 
-    # Vérifie et crée le dossier de destination sur le serveur backup s'il n'existe pas
+    # Tâche 1 : Crée le dossier de sauvegarde sur le serveur backup s'il n'existe pas
     - name: Créer le dossier de backup local s'il n'existe pas
       file:
-        path: "{{ remote_backup_dir }}"      # Chemin du dossier à créer sur backupserver
-        state: directory                     # S'assure que c'est bien un répertoire
-        owner: esieeadmin                    # Propriétaire du dossier
-        group: esieeadmin                    # Groupe associé au dossier
-        mode: '0755'                         # Droits d'accès : rwxr-xr-x
-      delegate_to: backupserver             # Cette tâche est exécutée sur le serveur de backup
+        path: "{{ remote_backup_dir }}"     # Chemin où les fichiers seront envoyés
+        state: directory                    # Crée un dossier s'il n'existe pas
+        owner: esieeadmin                   # Propriétaire du dossier
+        group: esieeadmin                   # Groupe associé
+        mode: '0755'                        # Droits d'accès : lecture/exécution pour tous, écriture pour le propriétaire
+      delegate_to: backupserver            # La tâche est exécutée sur le serveur de backup, pas sur mysqlreplicat
 
-    # Effectue une sauvegarde de la base MySQL locale avec mysqldump
-    - name: Faire un dump de la base MySQL
+    # Tâche 2 : Génère un dump SQL de chaque base listée dans db_list
+    - name: Faire un dump des bases MySQL client*
       ansible.builtin.command: >
-        mysqldump -u{{ mysql_user }} -p{{ mysql_password }} {{ db_name }} > {{ dump_file }}
+        mysqldump -u{{ mysql_user }} -p{{ mysql_password }} {{ item }} > /tmp/{{ item }}_backup.sql
       args:
-        creates: "{{ dump_file }}"           # Ne recrée pas le dump si le fichier existe déjà
+        creates: "/tmp/{{ item }}_backup.sql"   # Évite d'écraser le fichier s’il existe déjà
+      loop: "{{ db_list }}"                     # Répète la tâche pour chaque base listée dans db_list
 
-    # Transfère le fichier de dump généré vers le serveur de backup via SCP
-    - name: Transférer le dump vers le serveur backup via SCP
+    # Tâche 3 : Transfère chaque fichier dump vers le serveur de sauvegarde avec SCP
+    - name: Transférer chaque dump vers le serveur backup via SCP
       ansible.builtin.command: >
-        scp {{ dump_file }} esieeadmin@172.16.202.26:{{ remote_backup_dir }}
-      become_user: esieeadmin                # Exécute la commande en tant qu’utilisateur esieeadmin (pour que la clé SSH fonctionne)
+        scp /tmp/{{ item }}_backup.sql esieeadmin@172.16.202.26:{{ remote_backup_dir }}
+      become_user: esieeadmin                 # Exécute la commande en tant qu’esieeadmin pour utiliser sa clé SSH
+      loop: "{{ db_list }}"                   # Répète pour chaque fichier de dump
 
-    # Supprime le fichier de dump local pour libérer l’espace disque et sécuriser les données
-    - name: Supprimer le fichier de dump local (sécurité)
+    # Tâche 4 : Supprime chaque fichier dump après transfert (sécurité/stockage)
+    - name: Supprimer les fichiers dump locaux
       file:
-        path: "{{ dump_file }}"              # Chemin du fichier temporaire à supprimer
-        state: absent                        # Assure que le fichier est bien supprimé
+        path: "/tmp/{{ item }}_backup.sql"    # Chemin du fichier à supprimer
+        state: absent                         # Supprime le fichier s’il existe
+      loop: "{{ db_list }}"                   # Répète pour chaque fichier de dump
