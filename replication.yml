@@ -1,48 +1,6 @@
-- name: Configure replication on master
-  hosts: mysqlserver1
+- hosts: dbservers
   become: true
   vars_files:
     - vars/main.yml
-  tasks:
-    - name: Ensure replication user exists on master.
-      community.mysql.mysql_user:
-        name: esieeadmin
-        host: mysqlserver1
-        password: esiee
-        priv: "*.*:REPLICATION SLAVE"
-        state: present
-      when:
-        - mysql_replication_role == 'master'
-        - mysql_replication_user is defined
-
-- name: Configure replication on slave
-  hosts: mysqlreplicat
-  become: true
-  vars_files:
-    - vars/main.yml
-  tasks:
-    - name: Check slave replication status.
-      community.mysql.mysql_replication:
-        mode: getreplica
-        login_user: esieeadmin
-        login_password: esiee
-      ignore_errors: true
-      register: slave
-      when:
-        - mysql_replication_role == 'slave'
-
-    - name: Configure replication on the slave.
-      community.mysql.mysql_replication:
-        mode: changeprimary
-        master_host: mysqlserver1
-        master_user: esieeadmin
-        master_password: esiee
-      ignore_errors: true
-      when:
-        - mysql_replication_role == 'slave'
-
-    - name: Start replication.
-      community.mysql.mysql_replication:
-        mode: startreplica
-      when:
-        - mysql_replication_role == 'slave'
+  roles:
+    - { role: geerlingguy.mysql }
