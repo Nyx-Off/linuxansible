@@ -23,7 +23,6 @@
         owner: esieeadmin                   # Propriétaire du dossier
         group: esieeadmin                   # Groupe associé
         mode: '0755'                        # Droits d'accès : lecture/exécution pour tous, écriture pour le propriétaire
-      delegate_to: backupserver            # La tâche est exécutée sur le serveur de backup, pas sur mysqlreplicat
 
     # Tâche 2 : Génère un dump SQL de chaque base listée dans db_list
     - name: Faire un dump des bases MySQL client*

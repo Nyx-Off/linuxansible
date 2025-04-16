@@ -13,7 +13,7 @@
         owner: esieeadmin                    # Propriétaire du fichier
         group: esieeadmin                    # Groupe du fichier
         mode: '0600'                         # Permissions sécurisées (lecture/écriture pour le propriétaire)
-      become_user: esieeadmin                # Exécute la commande en tant qu'esieeadmin (non root)
+      become_user: esieeadmin                # Exécute la commande en tant qu'esieeadmin
 
     # Transfère la clé publique générée sur le serveur de backup vers la machine d’orchestration Ansible
     - name: Récupérer la clé publique du serveur de sauvegarde
