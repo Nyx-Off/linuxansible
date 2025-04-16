@@ -111,21 +111,4 @@
               {% endfor %}
           </body>
           </html>
-
-    - name: Créer un index.html personnalisé dans chaque répertoire client
-      copy:
-        dest: "/var/www/{{ item }}/index.html"
-        content: |
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <meta charset="utf-8">
-              <title>Bienvenue sur {{ item }}</title>
-          </head>
-          <body>
-              <h1>Page personnalisée pour {{ item }}</h1>
-              <p>Contenu personnalisé pour {{ item }}.</p>
-              <a href="/index.html">Retour à l'index</a>
-          </body>
-          </html>
-      loop: "{{ client_names | default([]) }}"
+          
