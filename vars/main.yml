@@ -31,6 +31,9 @@ mysql_users:
     host: "mysqlserver1"
     password: similarly-secure-password
     priv: "client4_db.*:ALL"
+  - name: sebastien
+    host: "mysqlserver1"
+    password: test123
 
 
 mysql_enable_binlog: true
