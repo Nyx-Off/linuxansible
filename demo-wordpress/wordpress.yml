@@ -1,7 +1,12 @@
-- hosts: webserver1
+- hosts: webservers
   become: true
+  gather_facts: false
 
   tasks:
+    - name: Extraire les noms des clients pour ce serveur
+      set_fact:
+        client_names: "{{ client_users | map(attribute='name') | list }}"
+
     - name: Télécharger WordPress archive
       ansible.builtin.get_url:
         url: https://wordpress.org/latest.zip
@@ -14,23 +19,26 @@
         state: present
         update_cache: yes
 
-    - name: Décompresser sans créer le dossier wordpress/
+    - name: Décompresser WordPress pour chaque client
       ansible.builtin.command:
-        cmd: unzip /tmp/wordpress.zip -d /var/www/client1
+        cmd: unzip /tmp/wordpress.zip -d /var/www/{{ item }}
       args:
-        creates: /var/www/client1/wordpress
+        creates: /var/www/{{ item }}/wordpress
+      loop: "{{ client_names }}"
 
-    - name: Déplacer le contenu de wordpress/ à la racine
+    - name: Déplacer le contenu wordpress/ à la racine pour chaque client
       ansible.builtin.shell: |
-        mv /var/www/client1/wordpress/* /var/www/client1/
-        rm -rf /var/www/client1/wordpress
+        mv /var/www/{{ item }}/wordpress/* /var/www/{{ item }}/
+        rm -rf /var/www/{{ item }}/wordpress
       args:
         executable: /bin/bash
+      loop: "{{ client_names }}"
 
-    - name: Appliquer les permissions
+    - name: Appliquer les permissions pour chaque client
       ansible.builtin.file:
-        path: /var/www/client1
+        path: /var/www/{{ item }}
         state: directory
         recurse: yes
         owner: www-data
         group: www-data
+      loop: "{{ client_names }}"
