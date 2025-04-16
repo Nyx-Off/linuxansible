@@ -4,6 +4,25 @@
   gather_facts: yes
 
   pre_tasks:
+    - name: Installer les prérequis (Apache, PHP et dépendances)
+      apt:
+        name:
+          - apache2
+          - ghostscript
+          - libapache2-mod-php
+          - php
+          - php-bcmath
+          - php-curl
+          - php-imagick
+          - php-intl
+          - php-json
+          - php-mbstring
+          - php-mysql
+          - php-xml
+          - php-zip
+        state: present
+        update_cache: yes
+
     - name: Créer le répertoire racine /var/www s'il n'existe pas
       file:
         path: "/var/www"
@@ -16,11 +35,9 @@
       set_fact:
         client_names: "{{ (client_users | default([])) | map(attribute='name') | list }}"
 
-    
     - name: debug 
       debug:
-        msg: "{{ client_users | default([]) }}" 
-
+        msg: "{{ client_users | default([]) }}"
 
     - name: Créer les répertoires clients dynamiquement à partir de l'inventaire
       file:
@@ -65,7 +82,7 @@
       - headers
 
     # Variables pour le rôle PHP (optionnel, selon vos besoins)
-    php_package: "php"  # Ou "php7.4", etc.
+    php_package: "php"  # Ou "php7.4" par exemple
     php_modules:
       - php-mysql
       - php-curl
