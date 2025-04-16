@@ -32,3 +32,8 @@ all:
             client_users:
               -client2
               -client4
+      backupserver:
+        hosts:
+          ansible_host: 172.16.202.26
+          ansible_user: esiee
+          
