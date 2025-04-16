@@ -14,8 +14,7 @@
 
     - name: Extraire les noms des clients
       set_fact:
-        client_names: "{{ client_users | map(attribute='name') | list }}"
-      when: client_users is defined
+        client_names: "{{ (client_users | default([])) | map(attribute='name') | list }}"
 
     - name: Créer les répertoires clients dynamiquement à partir de l'inventaire
       file:
