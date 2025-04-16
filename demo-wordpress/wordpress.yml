@@ -14,11 +14,18 @@
         state: present
         update_cache: yes
 
-    - name: Décompresser WordPress
-      ansible.builtin.unarchive:
-        src: /tmp/wordpress.zip
-        dest: /var/www/client1
-        remote_src: yes
+    - name: Décompresser sans créer le dossier wordpress/
+      ansible.builtin.command:
+        cmd: unzip /tmp/wordpress.zip -d /var/www/client1
+      args:
+        creates: /var/www/client1/wordpress
+
+    - name: Déplacer le contenu de wordpress/ à la racine
+      ansible.builtin.shell: |
+        mv /var/www/client1/wordpress/* /var/www/client1/
+        rm -rf /var/www/client1/wordpress
+      args:
+        executable: /bin/bash
 
     - name: Appliquer les permissions
       ansible.builtin.file:
