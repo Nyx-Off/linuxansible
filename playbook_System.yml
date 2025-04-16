@@ -1,0 +1,47 @@
+- hosts: all                    # Appliquer ce playbook sur tous les hôtes définis dans l'inventaire
+  become: true                 # Exécuter les tâches avec les privilèges root (sudo)
+  
+  tasks :
+
+    - name: Création de l'utilisateur esieeadmin
+      user:
+        name: esieeadmin       # Nom de l'utilisateur à créer
+        shell: /bin/bash       # Définit /bin/bash comme shell par défaut (accès au terminal)
+        comment: esieeadmin    # Commentaire associé à l'utilisateur (visible dans /etc/passwd)
+      
+    - name: Set authorized key taken from file
+      ansible.posix.authorized_key:
+        user: esieeadmin       # Spécifie l'utilisateur cible pour la clé SSH
+        state: present         # S'assure que la clé est présente (ajoutée si absente)
+        key: '{{ item }}'      # Clé publique à ajouter, lue depuis un fichier
+      with_file:
+        - public_keys/antony.txt     # Clé publique de Antony
+        - public_keys/clement.txt    # Clé publique de Clément
+        - public_keys/josselin.txt   # Clé publique de Josselin
+        - public_keys/samy.txt       # Clé publique de Samy
+        - public_keys/thommy.txt     # Clé publique de Thommy
+        
+
+    - name: Add esieeadmin to sudoers with no password (module sudoers)
+      community.general.sudoers:
+        name: esieeadmin     # Nom du fichier sudoers généré (/etc/sudoers.d/esieeadmin)
+        user: esieeadmin     # Utilisateur à qui on accorde les droits sudo
+        runas: ALL           # L'utilisateur peut exécuter des commandes en tant que n'importe quel utilisateur
+        commands: ALL        # L'utilisateur peut exécuter toutes les commandes via sudo
+        nopassword: true     # Ne demande pas de mot de passe pour utiliser sudo
+        state: present       # Assure que cette règle est bien présente
+
+    - name: Créer les utilisateurs clients sans sudo
+      user:
+        name: "{{ item.name }}"                     # Nom de l'utilisateur (ex. : client1, client2, etc.)
+        password: "{{ item.password | password_hash('sha512') }}"
+        comment: "Utilisateur {{ item.name }}"      # Description du compte, visible dans /etc/passwd
+        shell: /bin/bash                       # Définit /bin/bash comme shell par défaut (accès au terminal)
+      loop: "{{ client_users }}"               # Boucle sur chaque nom d'utilisateur défini dans la variable client_users
+      when: client_users is defined
+
+
+
+
+        
+# Commande d'execution du playbook : ansible-playbook -i inventory.yml playbook_User.yml -K
