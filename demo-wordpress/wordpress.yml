@@ -1,8 +1,29 @@
 - hosts: webserver1
   become: true
+
   tasks:
-    - name: Download WordPress archive
+    - name: Télécharger WordPress archive
       ansible.builtin.get_url:
         url: https://wordpress.org/latest.zip
         dest: /tmp/wordpress.zip
         mode: '0644'
+
+    - name: Installer unzip
+      ansible.builtin.apt:
+        name: unzip
+        state: present
+        update_cache: yes
+
+    - name: Décompresser WordPress
+      ansible.builtin.unarchive:
+        src: /tmp/wordpress.zip
+        dest: /var/www/client1
+        remote_src: yes
+
+    - name: Appliquer les permissions
+      ansible.builtin.file:
+        path: /var/www/client1
+        state: directory
+        recurse: yes
+        owner: www-data
+        group: www-data
