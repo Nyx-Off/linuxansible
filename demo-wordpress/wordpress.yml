@@ -1,21 +1,4 @@
-<<<<<<< HEAD
-- name: Download WordPress archive
-  ansible.builtin.get_url:
-    url: https://wordpress.org/latest.zip
-    dest: /tmp/wordpress.zip
-    mode: '0644'
-
-- name: Extract wordpress.zip into /var/www/client1/
-  ansible.builtin.unarchive:
-    src: /tmp/wordpress.zip
-    dest: /var/www/client1/
-
-- name: Extract wordpress.zip into /var/www/client2/
-  ansible.builtin.unarchive:
-    src: /tmp/wordpress.zip
-    dest: /var/www/client2/
-=======
-- hosts: webserver
+- hosts: webserver1
   become: true
   tasks:
     - name: Download WordPress archive
@@ -23,4 +6,3 @@
         url: https://wordpress.org/latest.zip
         dest: /tmp/wordpress.zip
         mode: '0644'
->>>>>>> 708f491 (modif wordpress.yml)
