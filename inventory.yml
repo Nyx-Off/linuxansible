@@ -40,6 +40,7 @@ all:
           aisible_user: esiee
     backupserver:
       hosts:
-        ansible_host: 172.16.202.26
-        ansible_user: esiee
+        backupserver:
+          ansible_host: 172.16.202.26
+          ansible_user: esiee
           
