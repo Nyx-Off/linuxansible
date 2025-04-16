@@ -1,9 +1,0 @@
-mysql_root_password: master-password
-mysql_replication_role: master
-mysql_replication_user: repl
-mysql_replication_password: repl-password
-
-mysql_databases:
-  - name: replicated_db
-    encoding: utf8
-    collation: utf8_general_ci

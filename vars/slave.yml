@@ -1,5 +1,0 @@
-mysql_root_password: slave-password
-mysql_replication_role: slave
-mysql_replication_user: repl
-mysql_replication_password: repl-password
-mysql_replication_master_host: 172.20.202.27
