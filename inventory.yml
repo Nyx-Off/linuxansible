@@ -3,7 +3,7 @@ all:
     webservers:
       hosts:
         webserver1:
-          ansible_host: 172.16.202.23
+          ansible_host: 172.16.210.37
           ansible_user: esiee
           client_users:
             - name: client1
@@ -11,7 +11,7 @@ all:
             - name: client3
               password: esiee
         webserver2:
-          ansible_host: 172.16.202.29
+          ansible_host: 172.16.210.36
           ansible_user: esiee
           client_users:
             - name: client2
@@ -22,7 +22,7 @@ all:
     dbservers:
       hosts:
         mysqlserver1:
-          ansible_host: 172.16.202.27
+          ansible_host: 172.16.210.39
           ansible_user: esiee
           mysql_server_id: "1"
           mysql_replication_role: "master"
@@ -36,7 +36,7 @@ all:
             - name: client4
               password: esiee
         mysqlreplicat:
-          ansible_host: 172.16.202.24
+          ansible_host: 172.16.210.34
           ansible_user: esiee
           mysql_server_id: "2"
           mysql_replication_role: "slave"
@@ -44,5 +44,5 @@ all:
     backupservers:
       hosts:
         backupserver:
-          ansible_host: 172.16.202.26
+          ansible_host: 172.16.210.38
           ansible_user: esiee
